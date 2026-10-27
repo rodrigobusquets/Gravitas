@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gravitas · ¿Es viable tu negocio?</title>
+<style>
+:root{--bg:#15171a;--card:#1e2126;--tx:#f3f5f8;--mu:#a4acb7;--bd:#343941;--ac:#0061FF;--ok:#0061FF;--wa:#8d96a3;--ko:#DD1717;--okb:#0a2147;--wab:#2a2d33;--kob:#3a1215;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
+
+
+*,*:before,*:after{box-sizing:inherit}
+html,body{margin:0}
+body{background:var(--bg);color:var(--tx);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+main{max-width:600px;margin:0 auto;padding:16px 16px 40px}
+h1{font-size:1.5rem;margin:.2em 0}h2{font-size:1.2rem;margin:0 0 .2em}h3{font-size:1rem;margin:1.2em 0 .4em}
+p{margin:.4em 0}.mu{color:var(--mu);font-size:.9rem}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:18px;margin:14px 0}
+.bar{height:8px;background:var(--bd);border-radius:9px;overflow:hidden;margin:6px 0 2px}.bar i{display:block;height:100%;background:var(--ac);transition:width .3s}
+label{display:block;font-weight:600;margin:16px 0 2px}.h{font-size:.85rem;color:var(--mu);margin:0 0 6px;font-weight:400}
+input,select{width:100%;font:inherit;padding:13px 14px;border:1.5px solid var(--bd);border-radius:12px;background:var(--bg);color:var(--tx)}
+input:focus,select:focus{outline:none;border-color:var(--ac)}
+.err{color:var(--ko);font-size:.85rem;margin-top:10px;min-height:1.2em}
+.row{display:flex;gap:10px;margin-top:18px}
+button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:14px 18px;cursor:pointer;flex:1;background:var(--ac);color:#fff}
+.logo{display:flex;justify-content:center;align-items:flex-end;padding:30px 0 8px;user-select:none}
+.logo span{display:inline-block;width:.72em;text-align:center;font:800 30px/1 Arial,Helvetica,sans-serif;transform-origin:50% 100%}
+.logo .c{color:var(--ac)}
+.tag{text-align:center;letter-spacing:.22em;font-size:.7rem;color:var(--mu);margin:2px 0 12px}
+@media print{:root{--bg:#fff;--card:#fff;--tx:#111;--mu:#555;--bd:#ccc;--okb:#e8f0ff;--wab:#eee;--kob:#fde8e8}.row,.noprint{display:none!important}}
+button.g{background:transparent;color:var(--tx);border:1.5px solid var(--bd)}
+.v{border-radius:16px;padding:18px;margin:14px 0;border:1.5px solid}
+.v.ok{background:var(--okb);border-color:var(--ok)}.v.wa{background:var(--wab);border-color:var(--wa)}.v.ko{background:var(--kob);border-color:var(--ko)}
+.v b{font-size:1.25rem;display:block}
+.hz{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--bd)}.hz:first-child{border:0}
+.dot{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff}
+.dot.ok{background:var(--ok)}.dot.wa{background:var(--wa)}.dot.ko{background:var(--ko)}
+table{width:100%;border-collapse:collapse;font-size:.92rem}td,th{padding:7px 4px;text-align:right;border-bottom:1px solid var(--bd)}td:first-child,th:first-child{text-align:left}
+.sc{overflow-x:auto}tr.t td{font-weight:700}
+ul{padding-left:1.2em;margin:.4em 0}li{margin:.4em 0}
+details{margin-top:10px}summary{cursor:pointer;font-weight:600}
+.wn{background:var(--wab);border:1px solid var(--wa);border-radius:12px;padding:10px 12px;font-size:.88rem;margin:10px 0}
+svg{width:100%;height:auto;display:block}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+// Datos de mercado (snapshot). Fuentes: INEGI, Banxico (SIDOF), Encuesta Citi de Expectativas.
+const MK={fecha:"2026-10-22",inflAct:0.0345,inpc:146.075,infl:[0.0383,0.0375,0.0375,0.0375,0.0375],tiie:0.06776,obj:0.065};
+const TREMA=MK.tiie+MK.infl.reduce((a,b)=>a+b,0)/MK.infl.length;
+const pc=x=>(x*100).toFixed(2).replace(/\.?0+$/,"")+"%";
+const mx=new Intl.NumberFormat("es-MX",{style:"currency",currency:"MXN",maximumFractionDigits:0});
+const $m=x=>(x<0?"−":"")+mx.format(Math.abs(x));
+const N=s=>{const x=parseFloat(String(s==null?"":s).replace(/[^0-9.\-]/g,""));return isNaN(x)?0:x};
+const STEPS=[
+{t:"Tu negocio",s:"Empecemos por lo básico. Responde con números aproximados: no necesitas contabilidad.",f:[
+ {k:"nom",l:"¿Cómo se llama tu negocio?",ty:"text",ph:"Ej. Tacos Doña Mary"},
+ {k:"tp",l:"¿Qué tipo de actividad tienes?",ty:"sel",o:[["0","Negocio con productos o local (tienda, comida, taller…)"],["1","Freelancer, comisionista o prestador de servicios (vivo de lo que cobro)"]]},
+ {k:"tt",l:"¿Cuánto tiempo llevas con este negocio?",h:"Nos ayuda a recomendarte si conviene seguir o retirarte.",ty:"sel",o:[["0","Aún no empiezo (es un proyecto)"],["1","Menos de 3 meses"],["2","De 3 meses a 1 año"],["3","De 1 a 3 años"],["4","Más de 3 años"]]},
+ {k:"hs",l:"¿Cuántas horas a la semana le dedicas?",h:"Opcional. Sirve para calcular cuánto vale tu hora.",ty:"n"},
+ {k:"reg",l:"¿Cómo pagas impuestos?",h:"Si no estás seguro, elige la primera. Es una estimación.",ty:"sel",o:[["0","No pago / soy informal"],["1","RESICO (persona física, ≈1 a 2.5% de ventas)"],["2","Régimen general o empresa (≈30% de la utilidad)"]]}]},
+{t:"Tus ventas",s:"Piensa en un mes normal, ni de los mejores ni de los peores.",f:[
+ {k:"v",l:"¿Cuánto vendes en un mes normal?",h:"Todo lo que cobras de clientes, sin descontar nada.",ty:"$",r:1},
+ {k:"u",l:"¿Cuántas ventas, piezas o servicios son al mes?",h:"Ej. 600 tacos, 40 pedidos, 25 cortes de pelo.",ty:"n",r:1},
+ {k:"mb",l:"¿Cuánto vendes en tu mejor mes?",h:"Opcional. Si lo dejas vacío usamos +20%.",ty:"$"},
+ {k:"mm",l:"¿Y en tu peor mes?",h:"Opcional. Si lo dejas vacío usamos −20%.",ty:"$"},
+ {k:"cr",l:"¿Cuánto crees que crezcan tus ventas por año (en cantidad)?",ty:"sel",o:[["0","No crecen"],["0.05","Poco (5%)"],["0.1","Medio (10%)"],["0.2","Mucho (20%)"]],dv:"0.05"}]},
+{t:"Lo que gastas para vender",s:"Gastos que suben o bajan según lo que vendes. Al mes.",f:[
+ {k:"cv",l:"¿Cuánto gastas en lo que vendes?",h:"Mercancía, ingredientes, materia prima, insumos.",ty:"$",r:1},
+ {k:"ov",l:"¿Comisiones, envíos, empaques, gasolina de reparto?",h:"Si no tienes, deja en 0.",ty:"$"}]},
+{t:"Gastos que pagas siempre",s:"Los pagues o no, cada mes. Incluye lo que te pagas tú.",f:[
+ {k:"renta",l:"Renta del local",ty:"$"},
+ {k:"suel",l:"Sueldos de ayudantes o empleados",ty:"$"},
+ {k:"serv",l:"Luz, agua, gas, internet y teléfono",ty:"$"},
+ {k:"pub",l:"Publicidad y redes",ty:"$"},
+ {k:"of",l:"Otros gastos fijos",h:"Contador, licencias, mantenimiento, transporte.",ty:"$"},
+ {k:"sd",l:"¿Cuánto te pagas tú de sueldo al mes?",h:"Si hoy es 0, pon cuánto necesitas para vivir: un negocio que no te paga no es negocio.",ty:"$"}]},
+{t:"Tu dinero y tus deudas",s:"Con esto armamos tu balance sencillo. Si no sabes algo, déjalo en 0.",f:[
+ {k:"inv",l:"¿Cuánto dinero pusiste (o pondrás) para arrancar?",h:"Equipo, local, inventario inicial, adaptaciones. Si no invertiste, deja 0.",ty:"$"},
+ {k:"caja",l:"Dinero en caja o banco hoy",ty:"$"},
+ {k:"invt",l:"Valor de tu inventario",ty:"$"},
+ {k:"eq",l:"Valor de tu equipo y mobiliario",ty:"$"},
+ {k:"xc",l:"Lo que te deben clientes (fiado)",ty:"$"},
+ {k:"xp",l:"Lo que debes a proveedores",ty:"$"},
+ {k:"deu",l:"Préstamos o deudas del negocio",ty:"$"},
+ {k:"pd",l:"Pago mensual de esas deudas",ty:"$"}]}];
+let S={step:0,d:{}};
+try{const x=JSON.parse(localStorage.getItem("bsp")||"null");if(x&&x.d)S.d=x.d}catch(e){}
+const save=()=>{try{localStorage.setItem("bsp",JSON.stringify({d:S.d}))}catch(e){}};
+const $=id=>document.getElementById(id);
+const app=$("app");
+
+function logo(){return '<div class="logo" role="img" aria-label="Gravitas">'+"GRAVITAS".split("").map((c,i)=>{const dd=Math.abs(i-3.5),y=-(dd-.5)*2.8,a=i<4?7.5:-7.5;return '<span'+(i===3||i===4?' class="c"':'')+' style="transform:translateY('+y.toFixed(1)+'px) rotate('+a+'deg) scale(.9,1.5)">'+c+'</span>'}).join("")+'</div><div class="tag">¿ES VIABLE TU NEGOCIO?</div>'}
+function head(){return logo()}
+let LAST=null;
+const FL={v:["¿Cuánto cobras o facturas en un mes normal?","Honorarios, comisiones y servicios cobrados, sin descontar gastos."],u:["¿Cuántos trabajos o clientes atiendes al mes?","Ej. 8 proyectos, 20 consultas, 15 ventas con comisión."],cv:["¿Cuánto gastas directamente en cada trabajo?","Materiales, comisiones que pagas, viáticos, subcontratistas."],ov:["¿Otros gastos que dependen de cuánto trabajas?","Gasolina, casetas, comisiones de plataformas. Si no tienes, deja 0."],renta:["Renta de oficina, coworking o espacio",""],sd:["¿Cuánto necesitas ganar al mes para vivir?","Es tu «sueldo». Si tus ingresos no lo cubren, hoy no te alcanza."],inv:["¿Cuánto invertiste en tus herramientas de trabajo?","Computadora, equipo, cursos, vehículo. Si no invertiste, deja 0."]};
+function decide(sv,d){const tt=N(d.tt),ko=sv==="ko";
+ if(sv==="ok")return["seguir adelante",["Tus números respaldan continuar."+(tt<=2?" Aún eres un negocio joven: cuida tu colchón de efectivo y revisa tus cifras cada mes.":" Mantén el control de ventas y gastos para no perder lo construido.")]];
+ if(tt<=1)return ko?["replantear o retirarte pronto",["Llevas poco tiempo y poca inversión hundida: salir hoy te cuesta poco. No sigas poniendo dinero con estos números.","Antes de retirarte prueba un cambio concreto por 30 a 60 días: subir precios, bajar costos o cambiar de producto o cliente.","Si no llegas a tu punto de equilibrio, cierra con orden y conserva tu capital para otra idea."]]:["probar con metas claras 3 meses",["Sigue, pero fija una meta: llegar al punto de equilibrio en 3 meses.","Invierte lo mínimo hasta comprobar que las ventas se sostienen."]];
+ if(tt===2)return ko?["corregir en 90 días o salir",["Aún estás a tiempo de salir sin perder mucho. Dale 90 días a un plan concreto: precios, costos y ventas mínimas.","Si al cabo de 3 meses no alcanzas el punto de equilibrio, retirarte será la decisión más sana."]]:["seguir y estabilizar",["Hay base, pero es frágil. Prioriza llegar a un margen de seguridad de 15% o más sobre tu punto de equilibrio."]];
+ return ko?["un plan de rescate antes de decidir",["Llevas tiempo y dinero en esto y eso pesa, pero decide por lo que viene, no por lo ya gastado: si los números no mejoran, seguir solo aumenta la pérdida.","Plan de 6 meses: sube precios, recorta gastos fijos, renegocia deudas y vende lo que no uses.","Mide cada mes. Si en 6 meses no llegas al punto de equilibrio, considera un cierre ordenado o vender el negocio y sus activos."]]:["ajustar para estabilizar",["Tienes una base construida. Conviene afinar precios y gastos antes de crecer o endeudarte."]];}
+function extras(d){const x=[];
+ if(N(d.tt)<=2)x.push(["Para que tu negocio nuevo sea más estable",["Junta un colchón de 2 a 3 meses de gastos fijos antes de crecer.","Separa tu dinero personal del del negocio y págate un sueldo fijo.","No te endeudes hasta comprobar que tus ventas se repiten cada mes.","Calcula tu precio con costos reales, incluyendo tu tiempo.","Revisa ventas y gastos cada semana durante el primer año."]]);
+ if(String(d.reg||"0")==="0")x.push(["Da el paso a la formalidad",["Cobra con tarjeta o transferencia: genera historial para pedir crédito, evita manejar tanto efectivo y vendes a más clientes.","Registra todas tus ventas y gastos (cuaderno, hoja de cálculo o una app). Sin números no puedes decidir ni pedir financiamiento.","Date de alta en Hacienda (SAT): con RFC puedes entrar a RESICO, pagar desde 1% de tus ventas y dar factura."]]);
+ return x}
+function stale(){const dias=(Date.now()-new Date(MK.fecha))/864e5;return dias>45?'<div class="wn">⚠️ Las tasas de mercado usadas son del '+MK.fecha+' y pueden estar desactualizadas.</div>':''}
+
+function renderStep(){
+  const st=STEPS[S.step],n=STEPS.length;
+  let h=head()+'<div class="mu">Paso '+(S.step+1)+' de '+n+' · '+st.t+'</div><div class="bar"><i style="width:'+((S.step+1)/n*100)+'%"></i></div><div class="card"><h2>'+st.t+'</h2><p class="mu">'+st.s+'</p>';
+  st.f.forEach(f=>{
+    const v=S.d[f.k]!=null?S.d[f.k]:(f.dv||"");
+    const fx=S.d.tp==="1"&&FL[f.k]?FL[f.k]:null,lb=fx?fx[0]:f.l,hh=fx?fx[1]:f.h;h+='<label for="'+f.k+'">'+lb+(f.r?' *':'')+'</label>'+(hh?'<p class="h">'+hh+'</p>':'');
+    if(f.ty==="sel")h+='<select id="'+f.k+'">'+f.o.map(o=>'<option value="'+o[0]+'"'+(String(v)===o[0]?' selected':'')+'>'+o[1]+'</option>').join("")+'</select>';
+    else h+='<input id="'+f.k+'" value="'+String(v).replace(/"/g,"&quot;")+'" '+(f.ty==="text"?'type="text" autocomplete="off" placeholder="'+(f.ph||"")+'"':'type="text" inputmode="decimal" placeholder="'+(f.ty==="$"?"$ 0":"0")+'"')+'>';
+  });
+  h+='<div class="err" id="err"></div><div class="row">'+(S.step?'<button class="g" id="bk">Atrás</button>':'')+'<button id="nx">'+(S.step===n-1?"Ver resultado":"Siguiente")+'</button></div></div><p class="mu">Tus respuestas se guardan solo en este dispositivo.</p>';
+  app.innerHTML=h;
+  st.f.forEach(f=>{const el=$(f.k);const fn=()=>{S.d[f.k]=el.value;save()};el.addEventListener("input",fn);el.addEventListener("change",fn);if(f.dv&&S.d[f.k]==null)S.d[f.k]=f.dv});
+  if($("bk"))$("bk").onclick=()=>{S.step--;renderStep();scrollTo(0,0)};
+  $("nx").onclick=()=>{
+    for(const f of st.f){if(f.r&&N(S.d[f.k])<=0){$("err").textContent="Falta este dato: "+f.l;$(f.k).focus();return}}
+    if(S.step<n-1){S.step++;renderStep()}else renderResults();
+    scrollTo(0,0)};
+}
+
+// ---------- Cálculo ----------
+function taxRate(vMes){return vMes<=25000?.01:vMes<=50000?.011:vMes<=83333.33?.015:vMes<=208333.33?.02:.025}
+function calc(d,fv){
+  const reg=String(d.reg||"0"),cr=N(d.cr),rows=[];
+  let v=N(d.v)*12*fv,cv=(N(d.cv)+N(d.ov))*12*fv,fj=(N(d.renta)+N(d.suel)+N(d.serv)+N(d.pub)+N(d.of)+N(d.sd))*12;
+  for(let t=-1;t<5;t++){
+    if(t>=0){const g=(1+MK.infl[t])*(1+cr);v*=g;cv*=g;fj*=1+MK.infl[t]}
+    const ub=v-cv,eb=ub-fj,tx=reg==="1"?v*taxRate(v/12):reg==="2"?Math.max(eb,0)*.30:0;
+    rows.push({v,cv,ub,fj,eb,tx,un:eb-tx});
+  }
+  return rows; // rows[0] = hoy, rows[1..5] = años 1 a 5
+}
+const van=(f,i,r)=>-i+f.reduce((a,x,t)=>a+x/Math.pow(1+r,t+1),0);
+function tir(f,i){const c=[-i,...f];if(!c.some(x=>x>0))return NaN;const g=r=>c.reduce((a,x,t)=>a+x/Math.pow(1+r,t),0);let lo=-.95,hi=20;if(g(lo)*g(hi)>0)return NaN;for(let k=0;k<200;k++){const m=(lo+hi)/2;g(lo)*g(m)<=0?hi=m:lo=m}return(lo+hi)/2}
+function rec(f,i){let a=0;for(let t=0;t<f.length;t++){if(f[t]>0&&a+f[t]>=i)return t+(i-a)/f[t];a+=f[t]}return null}
+function analyze(d){
+  const inv=Math.max(N(d.inv),1),mb=N(d.mb),mm=N(d.mm),v=N(d.v);
+  const fo=mb>0?Math.min(Math.max(mb/v,1),3):1.2,fp=mm>0?Math.min(Math.max(mm/v,.2),1):.8;
+  const sc={Base:1,Optimista:fo,Pesimista:fp},R={};
+  for(const k in sc){const rows=calc(d,sc[k]),f=rows.slice(1).map(r=>r.un);R[k]={rows,f,van:van(f,inv,TREMA),tir:tir(f,inv),rec:rec(f,inv)}}
+  const u=N(d.u),precio=v/u,cvu=(N(d.cv)+N(d.ov))/u,fm=(N(d.renta)+N(d.suel)+N(d.serv)+N(d.pub)+N(d.of)+N(d.sd)),mc=precio-cvu;
+  const pe=mc>0?{u:fm/mc,v:fm/mc*precio,ms:(u-fm/mc)/u}:null;
+  const act=N(d.caja)+N(d.invt)+N(d.eq)+N(d.xc),pas=N(d.xp)+N(d.deu);
+  return {R,pe,precio,cvu,mc,fm,act,pas,cap:act-pas,inv,fo,fp};
+}
+function lvl(A){
+  const b=A.R.Base,c=b.rows[1].un,cum=b.f.reduce((a,x)=>a+x,0);
+  const corto=c>0?(A.pe&&A.pe.ms>=.15?2:1):0;
+  const med=A.inv<=1?(c>0?2:0):b.rec!=null&&b.rec<=3?2:b.rec!=null&&b.rec<=5?1:0;
+  const lar=A.inv<=1?(b.van>0?2:0):b.van>0&&b.tir>TREMA?2:cum>A.inv?1:0;
+  return {corto,med,lar};
+}
+
+// ---------- Resultados ----------
+function chart(A){
+  const cols={Base:"var(--ac)",Optimista:"var(--tx)",Pesimista:"var(--ko)"},W=320,H=150,P=30;
+  const ser={};let mn=-A.inv,mxv=0;
+  for(const k in A.R){let a=-A.inv;ser[k]=[a,...A.R[k].f.map(x=>a+=x)];ser[k].forEach(x=>{mn=Math.min(mn,x);mxv=Math.max(mxv,x)})}
+  const sy=y=>H-14-(y-mn)/((mxv-mn)||1)*(H-28),sx=t=>P+t*(W-P-8)/5;
+  let s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Dinero acumulado por año"><line x1="'+P+'" x2="'+(W-8)+'" y1="'+sy(0)+'" y2="'+sy(0)+'" stroke="var(--mu)" stroke-dasharray="3 3"/>';
+  for(const k in ser)s+='<polyline fill="none" stroke="'+cols[k]+'" stroke-width="2.5" points="'+ser[k].map((y,t)=>sx(t)+","+sy(y)).join(" ")+'"/>';
+  for(let t=0;t<=5;t++)s+='<text x="'+sx(t)+'" y="'+(H-1)+'" font-size="9" text-anchor="middle" fill="var(--mu)">'+t+'</text>';
+  return s+'</svg><p class="mu">Años (0 = hoy). Sobre la línea punteada ya recuperaste tu inversión. <span style="color:var(--ac)">●</span> Base <span style="color:var(--tx)">●</span> Optimista <span style="color:var(--ko)">●</span> Pesimista</p>';
+}
+function tips(A,L,d){
+  const t=[],b=A.R.Base,r0=b.rows[0];
+  if(N(d.sd)===0)t.push("No te estás pagando sueldo. Súmalo a tus gastos: si el negocio no lo soporta, hoy trabajas gratis.");
+  if(!A.pe)t.push("Tu precio promedio ("+$m(A.precio)+") no cubre lo que cuesta producir cada venta ("+$m(A.cvu)+"). Sube precios o baja costos antes que nada.");
+  else if(A.pe.ms<.15)t.push("Estás muy cerca del punto de equilibrio: necesitas vender al menos "+Math.ceil(A.pe.u)+" al mes y hoy vendes "+N(d.u)+". Un mes flojo te dejaría en pérdida.");
+  if(r0.v>0&&r0.fj/r0.v>.35)t.push("Tus gastos fijos son el "+Math.round(r0.fj/r0.v*100)+"% de tus ventas. Renegocia renta o servicios, o vende más con la misma estructura.");
+  if(r0.v>0&&r0.cv/r0.v>.6)t.push("Lo que gastas para vender es el "+Math.round(r0.cv/r0.v*100)+"% de lo que ingresas. Compra por mayoreo, cuida mermas o ajusta precios.");
+  if(N(d.pd)>0){const cob=(r0.eb/12)/N(d.pd);if(cob<1.5)t.push("Tu utilidad mensual alcanza "+cob.toFixed(1)+" veces para tus pagos de deuda. Lo sano es 1.5 o más: evita endeudarte más.")}
+  if(A.cap<0)t.push("Debes más de lo que tienes (capital negativo de "+$m(A.cap)+"). Prioriza reducir deudas.");
+  if(A.R.Pesimista.van<=0&&L.lar>0)t.push("Si tus ventas bajan "+Math.round((1-A.fp)*100)+"%, el proyecto deja de valer la pena. Ten un colchón de efectivo para 2 o 3 meses.");
+  if(!t.length)t.push("Tus números se ven sólidos. Mantén control mensual de ventas y gastos para detectar desvíos a tiempo.");
+  return t;
+}
+function renderResults(){
+  const d=S.d,A=analyze(d),L=lvl(A),b=A.R.Base,r0=b.rows[0],fr=d.tp==="1";
+  const ls=[L.corto,L.med,L.lar],cls=x=>x===2?"ok":x===1?"wa":"ko",ic=x=>x===2?"✓":x===1?"!":"✕";
+  const any0=ls.includes(0),all2=ls.every(x=>x===2)&&A.R.Pesimista.van>0;
+  const ov=any0?["ko","No es viable hoy con estos números","Hay al menos un plazo donde el negocio no se sostiene. Revisa las recomendaciones abajo antes de invertir más."]:all2?["ok","Tu negocio es viable","Se sostiene en el corto, mediano y largo plazo, incluso si las ventas bajan."]:["wa","Viable, pero con riesgos","Funciona con tus números actuales, pero es sensible a que las ventas bajen o tarde la recuperación."];
+  const rc=b.rec!=null?b.rec.toFixed(1)+" años":"más de 5 años";
+  const hz=[
+   ["Corto plazo · 1 año","¿Sobrevives?",L.corto,L.corto===0?"Pierdes dinero el primer año ("+$m(b.rows[1].un)+").":"Ganas "+$m(b.rows[1].un)+" netos el primer año"+(A.pe?"; puedes bajar "+Math.max(0,Math.round(A.pe.ms*100))+"% tus ventas antes de perder.":".")],
+   ["Mediano plazo · 3 años","¿Recuperas tu dinero?",L.med,A.inv<=1?"Casi no invertiste dinero: lo clave es que cada mes te deje ganancia.":L.med===0?"Tu inversión de "+$m(A.inv)+" no se recupera en 5 años.":"Recuperas tu inversión en "+rc+"."],
+   ["Largo plazo · 5 años","¿Vale la pena vs. un banco?",L.lar,(A.inv<=1?"Ganancia neta acumulada en 5 años: "+$m(b.f.reduce((a,x)=>a+x,0))+".":"Rendimiento anual de tu negocio: "+(isNaN(b.tir)?"no calculable":pc(b.tir))+" frente a "+pc(TREMA)+" mínimo esperado. Valor creado: "+$m(b.van)+".")]];
+  const e=x=>$m(x/12),dec=decide(ov[0],d),ext=extras(d),take=r0.un/12+N(d.sd),hrs=N(d.hs)*52/12;
+  let h=head()+'<div class="mu">'+(d.nom?d.nom+' · ':'')+'Resultado</div>'+stale()+
+   '<div class="v '+ov[0]+'"><b>'+ov[1]+'</b>'+ov[2]+'</div>'+
+   '<div class="card"><h2>Tu negocio a corto, mediano y largo plazo</h2>'+hz.map(x=>'<div class="hz"><div class="dot '+cls(x[2])+'">'+ic(x[2])+'</div><div><b>'+x[0]+'</b><div class="mu">'+x[1]+'</div><div>'+x[3]+'</div></div></div>').join("")+'</div>'+
+   '<div class="card"><h2>Tu estado de resultados (por mes)</h2><table><tr><td>'+(fr?"Ingresos":"Ventas")+'</td><td>'+e(r0.v)+'</td></tr><tr><td>− '+(fr?"Gastos directos de tu trabajo":"Gastos para vender")+'</td><td>'+e(r0.cv)+'</td></tr><tr class="t"><td>= Lo que te deja cada venta</td><td>'+e(r0.ub)+'</td></tr><tr><td>− Gastos fijos (con tu sueldo)</td><td>'+e(r0.fj)+'</td></tr><tr><td>− Impuestos (estimado)</td><td>'+e(r0.tx)+'</td></tr><tr class="t"><td>= Ganancia neta</td><td>'+e(r0.un)+'</td></tr></table>'+
+   (hrs>0?'<p>Tu hora de trabajo vale aprox. <b>'+$m(take/hrs)+'</b> (tu sueldo más la ganancia neta, entre tus horas trabajadas).</p>':'')+(A.pe?'<p><b>Punto de equilibrio:</b> necesitas vender '+Math.ceil(A.pe.u).toLocaleString("es-MX")+' al mes ('+$m(A.pe.v)+') para no perder. Hoy vendes '+N(d.u).toLocaleString("es-MX")+'.</p>':'<p class="wn">Tu precio no cubre el costo de cada venta: no hay punto de equilibrio.</p>')+'</div>'+
+   '<div class="card"><h2>Tu balance sencillo</h2><table><tr><td>Lo que tienes (caja, inventario, equipo, por cobrar)</td><td>'+$m(A.act)+'</td></tr><tr><td>Lo que debes (proveedores y deudas)</td><td>'+$m(A.pas)+'</td></tr><tr class="t"><td>Lo que realmente es tuyo</td><td>'+$m(A.cap)+'</td></tr></table></div>'+
+   '<div class="card"><h2>Tres escenarios a 5 años</h2><div class="sc"><table><tr><th></th><th>Ganancia año 1</th><th>Valor creado</th><th>Recuperas en</th></tr>'+Object.keys(A.R).map(k=>{const r=A.R[k];return '<tr><td>'+k+'</td><td>'+$m(r.rows[1].un)+'</td><td>'+$m(r.van)+'</td><td>'+(r.rec!=null?r.rec.toFixed(1)+" años":">5")+'</td></tr>'}).join("")+'</table></div><p class="mu">Optimista: ventas ×'+A.fo.toFixed(2)+' · Pesimista: ×'+A.fp.toFixed(2)+'</p>'+chart(A)+'</div>'+
+   '<div class="card"><h2>Decisión sugerida: '+dec[0]+'</h2><ul>'+dec[1].map(x=>'<li>'+x+'</li>').join("")+'</ul></div>'+'<div class="card"><h2>Qué te recomendamos</h2><ul>'+tips(A,L,d).map(x=>'<li>'+x+'</li>').join("")+'</ul></div>'+ext.map(c=>'<div class="card"><h2>'+c[0]+'</h2><ul>'+c[1].map(x=>'<li>'+x+'</li>').join("")+'</ul></div>').join("")+
+   '<div class="card"><h2>Datos de mercado usados</h2><p class="mu">Actualizados al '+MK.fecha+'.</p><ul><li>Inflación anual (INEGI, sep 2026): <b>'+pc(MK.inflAct)+'</b></li><li>Inflación esperada (analistas, Citi): <b>'+pc(MK.infl[0])+'</b> el próximo año y <b>'+pc(MK.infl[1])+'</b> promedio después</li><li>TIIE a 28 días (Banxico): <b>'+pc(MK.tiie)+'</b> · Tasa objetivo Banxico: <b>'+pc(MK.obj)+'</b></li><li>Rendimiento mínimo que debe darte el negocio (TIIE + inflación): <b>'+pc(TREMA)+'</b></li></ul>'+
+   '<details><summary>Cómo se calcula</summary><p class="mu">Anualizamos tus datos mensuales (×12). Los precios y gastos fijos suben con la inflación esperada y los gastos de venta crecen junto con las ventas. El valor creado (VAN) descuenta 5 años de ganancias netas al rendimiento mínimo y resta tu inversión. Los impuestos son una estimación: RESICO usa la tabla mensual de ISR sobre ventas; el régimen general, 30% de la utilidad. No incluye IVA. Es una guía inicial, no sustituye a un contador.</p></details></div>'+
+   '<div class="row noprint"><button id="pdf">Descargar informe en PDF</button></div><div class="row"><button class="g" id="ed">Editar respuestas</button><button class="g" id="nw">Empezar de nuevo</button></div><p class="mu" style="text-align:center">Gravitas · Resultados estimados. Úsalos como guía para decidir, no como garantía.</p>';
+  app.innerHTML=h;
+  $("ed").onclick=()=>{S.step=0;renderStep();scrollTo(0,0)};
+  $("nw").onclick=()=>{S.d={};save();S.step=0;renderStep();scrollTo(0,0)};
+  LAST={A,L,d,ov,hz,tp:tips(A,L,d),dec,ext};
+  $("pdf").onclick=async()=>{const b=$("pdf");b.disabled=true;b.textContent="Generando…";try{await pdf()}catch(e){window.print()}b.disabled=false;b.textContent="Descargar informe en PDF"};
+}
+const LIB="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+const loadPdf=()=>new Promise((ok,ko)=>{if(window.jspdf)return ok();const s=document.createElement("script");s.src=LIB;s.onload=ok;s.onerror=ko;document.head.appendChild(s)});
+const ps=s=>String(s).replace(/≈/g,"aprox. ").replace(/[−–]/g,"-").replace(/×/g,"x").replace(/\u00A0/g," ").replace(/[^\x20-\x7E\u00A1-\u00FF]/g,"");
+async function pdf(){
+ const R=LAST;if(!R)return;await loadPdf();
+ const {A,d,ov,hz}=R,{jsPDF}=window.jspdf,doc=new jsPDF({unit:"mm",format:"a4"}),W=210,M=15;let y=46;
+ doc.setFillColor(21,23,26);doc.rect(0,0,W,38,"F");
+ "GRAVITAS".split("").forEach((c,i)=>{const dd=Math.abs(i-3.5);doc.setFont("helvetica","bold").setFontSize(26).setTextColor(...(i===3||i===4?[0,97,255]:[243,245,248]));doc.text(c,W/2+(i-4)*7.6+.8,26-(dd-.5)*.9,{angle:i<4?-7.5:7.5})});
+ doc.setFont("helvetica","normal").setFontSize(7).setTextColor(164,172,183);doc.text("¿ES VIABLE TU NEGOCIO?",W/2,33,{align:"center",charSpace:1.2});
+ const pg=n=>{if(y+n>284){doc.addPage();y=18}};
+ const T=(t,sz=10,b=0,c=[30,30,30],ind=0)=>{doc.setFont("helvetica",b?"bold":"normal").setFontSize(sz).setTextColor(...c);doc.splitTextToSize(ps(t),W-2*M-ind).forEach(l=>{pg(sz*.5);doc.text(l,M+ind,y);y+=sz*.46});y+=1.5};
+ const KV=(a,b,bo)=>{pg(7);doc.setFont("helvetica",bo?"bold":"normal").setFontSize(10).setTextColor(30,30,30);doc.text(ps(a),M,y);doc.text(ps(b),W-M,y,{align:"right"});y+=6};
+ const H=t=>{y+=3;T(t,12,1,[0,97,255])};
+ const col={ko:[221,23,23],ok:[0,97,255],wa:[90,96,105]},r0=A.R.Base.rows[0],m=x=>$m(x/12);
+ T((d.nom||"Mi negocio")+" - Informe de viabilidad",15,1);T("Generado el "+new Date().toLocaleDateString("es-MX")+" con Gravitas",9,0,[110,110,110]);
+ y+=2;T(ov[1],13,1,col[ov[0]]);T(ov[2]);
+ H("Corto, mediano y largo plazo");hz.forEach(x=>{T(x[0]+": "+["Mal","Con riesgos","Bien"][x[2]],10,1);T(x[3],10,0,[60,60,60],3)});
+ H("Decisión sugerida: "+R.dec[0]);R.dec[1].forEach(l=>T("- "+l,10,0,[30,30,30],3));
+ H("Estado de resultados (por mes)");[["Ingresos / ventas",r0.v],["- Gastos para vender",r0.cv],["= Utilidad bruta",r0.ub],["- Gastos fijos (con tu sueldo)",r0.fj],["- Impuestos (estimado)",r0.tx],["= Ganancia neta",r0.un]].forEach((r,i)=>KV(r[0],m(r[1]),i===2||i===5));
+ if(A.pe)T("Punto de equilibrio: "+Math.ceil(A.pe.u)+" ventas al mes ("+$m(A.pe.v)+"). Hoy: "+N(d.u)+".");
+ H("Balance sencillo");KV("Lo que tienes",$m(A.act));KV("Lo que debes",$m(A.pas));KV("Lo que es tuyo",$m(A.cap),1);
+ H("Escenarios a 5 años");Object.keys(A.R).forEach(k=>KV(k,"Ganancia año 1: "+$m(A.R[k].rows[1].un)+"  |  Valor creado: "+$m(A.R[k].van)));
+ H("Recomendaciones");R.tp.forEach(l=>T("- "+l,10,0,[30,30,30],3));
+ R.ext.forEach(c=>{H(c[0]);c[1].forEach(l=>T("- "+l,10,0,[30,30,30],3))});
+ H("Datos de mercado usados (al "+MK.fecha+")");T("Inflación anual INEGI sep 2026: "+pc(MK.inflAct)+". Inflación esperada: "+pc(MK.infl[0])+" y "+pc(MK.infl[1])+" promedio después. TIIE 28 días: "+pc(MK.tiie)+". Rendimiento mínimo (TIIE + inflación): "+pc(TREMA)+".",9);
+ T("Resultados estimados; no sustituyen la asesoría de un contador. Los impuestos son aproximados y no incluyen IVA.",8,0,[110,110,110]);
+ const blob=doc.output("blob"),name="Gravitas-informe.pdf";let dl=null;
+ try{dl=window.claude&&claude.use?await claude.use("downloads"):null}catch(e){}
+ if(dl){try{await dl.save({filename:name,data:blob});return}catch(e){if(e&&e.code==="declined")return}}
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();
+}
+renderStep();
+</script>
+</body>
+</html>
