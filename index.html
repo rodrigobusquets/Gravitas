@@ -235,10 +235,16 @@ async function pdf(){
  R.ext.forEach(c=>{H(c[0]);c[1].forEach(l=>T("- "+l,10,0,[30,30,30],3))});
  H("Datos de mercado usados (al "+MK.fecha+")");T("Inflación anual INEGI sep 2026: "+pc(MK.inflAct)+". Inflación esperada: "+pc(MK.infl[0])+" y "+pc(MK.infl[1])+" promedio después. TIIE 28 días: "+pc(MK.tiie)+". Rendimiento mínimo (TIIE + inflación): "+pc(TREMA)+".",9);
  T("Resultados estimados; no sustituyen la asesoría de un contador. Los impuestos son aproximados y no incluyen IVA.",8,0,[110,110,110]);
- const blob=doc.output("blob"),name="Gravitas-informe.pdf";let dl=null;
- try{dl=window.claude&&claude.use?await claude.use("downloads"):null}catch(e){}
- if(dl){try{await dl.save({filename:name,data:blob});return}catch(e){if(e&&e.code==="declined")return}}
- const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();
+  const blob=doc.output("blob");
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement("a");
+ a.href=url;
+ a.download="Gravitas-informe.pdf";
+ a.style.display="none";
+ document.body.appendChild(a);
+ a.click();
+ a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 renderStep();
 </script>
